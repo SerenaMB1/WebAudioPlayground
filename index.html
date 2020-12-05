@@ -1,0 +1,190 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="utf-8"/>
+    <title>WEB AUDIO BABY</title>
+
+
+      <style>
+
+      </style>
+
+  </head>
+	<body>
+
+    <button type="button" id="playButton"> Play </button>
+    <button type="button" id="stopButton"> Stop </button>
+
+    <div>
+      <h1>OSC Controls</h1>
+      <ul>
+        <li>
+
+          <div>
+            <h2>OSC1</h2>
+            <input type="range" min="0" max="1" step="0.05" value="0.5" id="osc1Gain"> Gain <br>
+            <input type="range" min="150" max="20000" step="0.05" value="440" id="osc1Freq"> Frequency <br> 
+            <input type="range" min="-100" max="100" step="0.05" value="0.5" id="osc1Tune"> Fine Tune <br> 
+          </div>
+        </li>
+
+        <li>
+          <div>
+            <h2>OSC2</h2>
+            <input type="range" min="0" max="1" step="0.05" value="0.5" id="osc2Gain"> Gain <br>
+            <input type="range" min="250" max="20000" step="0.05" value="440" id="osc2Freq"> Frequency <br> 
+            <input type="range" min="-100" max="100" step="0.05" value="0.5" id="osc2Tune"> Fine Tune <br> 
+          </div>
+        </li>
+
+        <li>
+          <div>
+            <h2>OSC3</h2>
+            <input type="range" min="0" max="1" step="0.05" value="0.5" id="osc3Gain"> Gain <br>
+            <input type="range" min="350" max="30000" step="0.05" value="0.5" id="osc3Freq"> Frequency <br> 
+            <input type="range" min="-100" max="100" step="0.05" value="0.5" id="osc3Tune"> Fine Tune <br> 
+          </div>
+        </li>
+
+      </ul>
+    </div>
+
+    <script text="text/javascritpt">
+
+      let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+      if(audioCtx == null){
+        alert("Audio Context is null!")
+      }
+
+      // Global Vars
+      running = false
+
+      // Setup master gain
+      let masterGainNode = audioCtx.createGain();
+      masterGainNode.connect(audioCtx.destination);
+      masterGainNode.gain = 0.5
+
+      // Create Oscillators
+      // osc1 
+      let osc1 = audioCtx.createOscillator();
+      let osc1Gain = audioCtx.createGain();
+      osc1.frequency.value = 440
+      osc1.type = "sine"
+      osc1.connect(osc1Gain);
+      osc1.detune = -1
+      osc1Gain.gain.value = 0.5
+      osc1Gain.connect(masterGainNode)
+
+      // osc2
+      let osc2 = audioCtx.createOscillator();
+      let osc2Gain = audioCtx.createGain();
+      osc2.frequency.value = 440
+      osc2.type = "sine"
+      osc2.connect(osc2Gain)
+      osc1Gain.gain.value = 0
+      osc2Gain.connect(masterGainNode)
+
+      // osc3
+      let osc3 = audioCtx.createOscillator();
+      let osc3Gain = audioCtx.createGain();
+      osc3.frequency.value = 440
+      osc3.type = "sine"
+      osc1.detune = 1
+      osc3Gain.connect(masterGainNode)
+      osc1Gain.gain.value = 0
+      osc3.connect(osc3Gain);
+
+      // start Oscs
+      osc1.start()
+      osc2.start()
+      osc3.start()
+
+      // lfo1
+      let lfo1 = audioCtx.createOscillator();
+
+      // Controls 
+      let playButton = document.querySelector("#playButton") 
+      let stopButton = document.querySelector("#stopButton") 
+
+      // Osc Controls
+      let osc1GainSlider = document.querySelector("#osc1Gain")
+      let osc1FreqSlider = document.querySelector("#osc1Freq")
+      let osc1TuneSlider = document.querySelector("#osc1Tune")
+
+      let osc2GainSlider = document.querySelector("#osc2Gain")
+      let osc2FreqSlider = document.querySelector("#osc2Freq")
+      let osc2TuneSlider = document.querySelector("#osc2Tune")
+
+      let osc3GainSlider = document.querySelector("#osc3Gain")
+      let osc3FreqSlider = document.querySelector("#osc3Freq")
+      let osc3TuneSlider = document.querySelector("#osc3Tune")
+
+      // Control events 
+      playButton.addEventListener("click", function() {
+
+        running = true
+
+        // The context starts paused and is not allowed to start until a user has interacted with the page
+        // Therefore we need to resume the context 
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume()
+        }
+
+      });
+
+      stopButton.addEventListener("click", function() {
+        running = false
+
+        audioCtx.suspend()
+
+      });
+
+      // OSC1 Controlls
+
+      osc1GainSlider.addEventListener("input", function() { 
+        osc1Gain.gain.setValueAtTime(osc1GainSlider.value, audioCtx.currentTime)
+      });
+
+      osc1FreqSlider.addEventListener("input", function() { 
+        osc1.frequency.setValueAtTime(osc1FreqSlider.value, audioCtx.currentTime)
+      });
+
+      osc1TuneSlider.addEventListener("input", function() { 
+        osc1.detune.setValueAtTime(osc1TuneSlider.value, audioCtx.currentTime)
+      });
+
+      // OSC2 Controlls
+
+      osc2GainSlider.addEventListener("input", function() { 
+        osc2Gain.gain.setValueAtTime(osc2GainSlider.value, audioCtx.currentTime)
+      });
+
+      osc2FreqSlider.addEventListener("input", function() { 
+        osc2.frequency.setValueAtTime(osc2FreqSlider.value, audioCtx.currentTime)
+      });
+
+      osc2TuneSlider.addEventListener("input", function() { 
+        osc2.detune.setValueAtTime(osc2TuneSlider.value, audioCtx.currentTime)
+      });
+
+      // OSC3 Controlls
+
+      osc3GainSlider.addEventListener("input", function() { 
+        osc3Gain.gain.setValueAtTime(osc3GainSlider.value, audioCtx.currentTime)
+      });
+
+      osc3FreqSlider.addEventListener("input", function() { 
+        osc3.frequency.setValueAtTime(osc3FreqSlider.value, audioCtx.currentTime)
+      });
+
+      osc3TuneSlider.addEventListener("input", function() { 
+        osc3.detune.setValueAtTime(osc3TuneSlider.value, audioCtx.currentTime)
+      });
+
+
+      
+      </script>
+	</body>
+</html>
